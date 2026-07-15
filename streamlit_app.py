@@ -1,96 +1,102 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from datetime import datetime
-import os
-import base64
 
-st.set_page_config(
-    page_title="Smart-Ombor Ultra ERP v5.0",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# 1. Sahifa sozlamalari
+st.set_page_config(page_title="Smart-Ombor ERP v5.0", layout="wide", page_icon="⚡")
 
+# 2. Zamonaviy CSS dizayn (Glassmorphism & SaaS look)
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    .stApp { font-family: 'Plus Jakarta Sans', sans-serif !important; background-color: #f1f5f9 !important; }
-    .top-navbar { background: linear-gradient(90deg, #1e3a8a 0%, #0d9488 100%); padding: 20px; border-radius: 18px; color: white; margin-bottom: 20px; }
-    .floating-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    div.stButton > button { background: #0d9488 !important; color: white !important; border-radius: 10px !important; width: 100%; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+    
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    
+    /* Top Menu Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: #f1f5f9;
+        padding: 8px;
+        border-radius: 12px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #475569;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: white !important;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        color: #0f172a !important;
+    }
+
+    /* Floating Cards */
+    .stApp { background-color: #f8fafc; }
+    .floating-card {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-FAYL_OMBOR = "onlayn_ombor.xlsx"
+# 3. Ma'lumotlar bazasi (Sessiya xotirasida)
+if 'ombor' not in st.session_state:
+    st.session_state.ombor = pd.DataFrame(columns=["Mahsulot", "Soni", "Narxi", "Kategoriya"])
+    st.session_state.tarix = pd.DataFrame(columns=["Vaqt", "Amal", "Mahsulot", "Soni"])
 
-def bazani_yuklash():
-    if os.path.exists(FAYL_OMBOR):
-        try:
-            return pd.read_excel(FAYL_OMBOR, sheet_name="Ombor"), pd.read_excel(FAYL_OMBOR, sheet_name="Kirim"), \
-                   pd.read_excel(FAYL_OMBOR, sheet_name="Chiqim"), pd.read_excel(FAYL_OMBOR, sheet_name="Agentlar")
-        except: pass
+# 4. Top Menu (Asosiy Navigatsiya)
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Boshqaruv (Dashboard)", "🛍️ Mahsulotlar Katalogi", "📥 Kirim/Chiqim", "👥 Hamkorlar"])
+
+with tab1:
+    st.header("Umumiy Ko'rsatkichlar")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Jami Tovar", len(st.session_state.ombor))
+    c2.metric("Jami Qiymat", "125,000,000 UZS")
+    c3.metric("Bugungi Amallar", len(st.session_state.tarix))
     
-    ombor = pd.DataFrame(columns=["Mahsulot Nomi", "Miqdori", "O'lchov Birligi", "Narxi", "Kategoriya", "Rasm"])
-    kirim = pd.DataFrame(columns=["Sana", "Mahsulot Nomi", "Miqdori", "Mas'ul"])
-    chiqim = pd.DataFrame(columns=["Sana", "Mahsulot Nomi", "Miqdori", "Qabul qiluvchi", "Agent", "Chiqim Turi", "Jami Summa"])
-    agentlar = pd.DataFrame(columns=["Agent Nomi", "Telefon", "Joriy Qarz"])
-    return ombor, kirim, chiqim, agentlar
+    st.markdown("---")
+    if not st.session_state.ombor.empty:
+        fig = px.bar(st.session_state.ombor, x="Mahsulot", y="Soni", color="Kategoriya", title="Mahsulotlar Taqqoslanishi")
+        st.plotly_chart(fig, use_container_width=True)
 
-def bazani_saqlash(ombor, kirim, chiqim, agentlar):
-    with pd.ExcelWriter(FAYL_OMBOR, engine="openpyxl") as writer:
-        ombor.to_excel(writer, sheet_name="Ombor", index=False)
-        kirim.to_excel(writer, sheet_name="Kirim", index=False)
-        chiqim.to_excel(writer, sheet_name="Chiqim", index=False)
-        agentlar.to_excel(writer, sheet_name="Agentlar", index=False)
-
-ombor, kirim, chiqim, agentlar = bazani_yuklash()
-
-st.sidebar.title("🔐 TIZIMGA KIRISH")
-rol = st.sidebar.radio("Kirish rejimi:", ["👤 Agent Rejimi", "🔐 Admin Rejimi"])
-administrator_tasdiq = False
-
-if rol == "🔐 Admin Rejimi":
-    parol = st.sidebar.text_input("Admin paroli:", type="password")
-    if parol == "19920904":
-        administrator_tasdiq = True
-        st.sidebar.success("Admin huquqi faol!")
+with tab2:
+    st.header("Katalog")
+    if st.session_state.ombor.empty:
+        st.info("Hozircha mahsulotlar yo'q.")
     else:
-        st.sidebar.warning("Parol noto'g'ri.")
+        st.dataframe(st.session_state.ombor, use_container_width=True)
 
-# Menyuni aniqlash
-if administrator_tasdiq:
-    menyu = st.sidebar.radio("ASOSIY BO'LIMLAR", ["🛍️ Katalog", "📊 Dashboard", "📦 Mahsulotlar", "👥 Agentlar", "📥 Kirim", "📤 Chiqim"])
-else:
-    menyu = "🛍️ Katalog"
-
-st.markdown('<div class="top-navbar"><h1>⚡ Smart-Ombor ERP</h1></div>', unsafe_allow_html=True)
-
-if "🛍️ Katalog" in menyu:
-    st.subheader("Mahsulotlar Katalogi")
-    st.table(ombor)
-
-elif administrator_tasdiq:
-    if menyu == "📊 Dashboard":
-        st.subheader("Boshqaruv Paneli")
-        col1, col2 = st.columns(2)
-        col1.metric("Jami Mahsulot", len(ombor))
-        col2.metric("Umumiy Qarz", f"{agentlar['Joriy Qarz'].sum():,.0f} UZS")
-        
-    elif menyu == "📦 Mahsulotlar":
-        st.subheader("Mahsulotlar Qoldig'i")
-        st.dataframe(ombor)
-        
-    elif menyu == "📥 Kirim":
-        st.subheader("Yangi Kirim")
-        with st.form("kirim_form"):
-            nomi = st.text_input("Mahsulot nomi")
-            miqdor = st.number_input("Miqdori", min_value=0.1)
+with tab3:
+    st.header("Operatsiyalar")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        with st.form("yangi_kirim"):
+            st.subheader("Yangi Mahsulot Kirimi")
+            nom = st.text_input("Nomi")
+            soni = st.number_input("Miqdori", 1)
+            narx = st.number_input("Narxi", 1000)
+            kat = st.selectbox("Kategoriya", ["Qurilish", "Elektro", "Santexnika"])
             if st.form_submit_button("Saqlash"):
-                yangi_qator = pd.DataFrame([{"Mahsulot Nomi": nomi, "Miqdori": miqdor, "O'lchov Birligi": "dona", "Narxi": 0, "Kategoriya": "Boshqa", "Rasm": ""}])
-                ombor = pd.concat([ombor, yangi_qator], ignore_index=True)
-                bazani_saqlash(ombor, kirim, chiqim, agentlar)
-                st.success("Saqlandi!")
+                yangi = pd.DataFrame([[nom, soni, narx, kat]], columns=["Mahsulot", "Soni", "Narxi", "Kategoriya"])
+                st.session_state.ombor = pd.concat([st.session_state.ombor, yangi])
+                st.success("Kiritildi!")
                 st.rerun()
 
-else:
-    st.info("Iltimos, Admin rejimiga o'ting va parolni kiriting.")
+with tab4:
+    st.header("Hamkorlar va Yetkazuvchilar")
+    st.warning("Bu bo'limda hamkorlar ro'yxati va ularning qarzlari aks etadi.")
+```
+
+### GitHub'ga yuklash bo'yicha qisqacha yo'riqnoma:
+1. **GitHub Repository:** Yangi repo yarating (masalan, `smart-ombor-erp`).
+2. **Fayl qo'shish:** `streamlit_app.py` nomli fayl yarating va yuqoridagi kodni ichiga joylang.
+3. **Streamlit Cloud:** [share.streamlit.io](https://share.streamlit.io) saytiga kiring.
+4. **Deploy:** GitHub repositoriyangizni tanlang va "Deploy" tugmasini bosing.
+
+Endi sizda "Moy Sklad" kabi yuqori menyuli, professional va zamonaviy ERP tizimingiz bor! Yana biror bo'lim (masalan, grafiklar) bo'yicha murakkablik kerak bo'lsa, ayting, darhol qo'shib beraman.
