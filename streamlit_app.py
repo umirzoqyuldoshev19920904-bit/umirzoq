@@ -6,99 +6,207 @@ import base64
 
 # Sahifaning yuqori sozlamalari
 st.set_page_config(
-    page_title="Smart-Ombor Pro ERP v3.0",
+    page_title="Smart-Ombor Ultra ERP v4.0",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom Premium CSS - Glassmorphism, Neon va Yandex Market kartochkalari dizayni
+# Custom Premium CSS - Streamlit elementlarini butunlay o'zgartirish va brend dizayn berish
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     
-    /* Umumiy fon */
+    /* Umumiy fon sozlamalari */
     .stApp {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        background-color: #f4f6fa !important;
+        background-color: #f8fafc !important;
     }
     
-    /* Sidebar dizayni */
+    /* Streamlit menyulari va keraksiz elementlarni yashirish */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* Sidebar premium dizayni */
     [data-testid="stSidebar"] {
-        background-color: #0f172a !important;
-        border-right: 1px solid #1e293b;
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+        border-right: 1px solid #334155 !important;
     }
     [data-testid="stSidebar"] * {
         color: #f1f5f9 !important;
     }
     
-    /* Sidebar navigatsiya tugmalari */
+    /* Sidebar navigatsiya tugmalari dizayni */
     div[data-testid="stSidebarUserContent"] div[role="radiogroup"] {
-        gap: 8px !important;
+        gap: 12px !important;
+        padding-top: 10px;
     }
     div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label {
-        background-color: #1e293b !important;
+        background-color: rgba(30, 41, 59, 0.7) !important;
         color: #94a3b8 !important;
-        border-radius: 12px !important;
-        padding: 10px 14px !important;
-        border: 1px solid #334155 !important;
+        border-radius: 16px !important;
+        padding: 14px 18px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
         font-weight: 600 !important;
+        font-size: 14px !important;
         cursor: pointer !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         width: 100% !important;
         display: flex !important;
         align-items: center !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
     div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label[data-checked="true"] {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
         color: white !important;
         border-color: #6366f1 !important;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4) !important;
+        transform: translateY(-2px);
     }
     div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label:hover {
-        background-color: #334155 !important;
+        background-color: #1e293b !important;
         color: #f1f5f9 !important;
+        transform: translateY(-1px);
     }
     div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label div[role="presentation"] {
         display: none !important;
     }
 
-    /* Asosiy Tugmalar */
-    div.stButton > button {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-        color: white !important;
-        border-radius: 12px !important;
-        border: none !important;
-        padding: 10px 20px !important;
-        font-weight: 700 !important;
+    /* Streamlit kiritish maydonlari (Inputs) dizaynini modernizatsiya qilish */
+    div[data-testid="stTextInput"] input, 
+    div[data-testid="stNumberInput"] input,
+    div[data-testid="stSelectbox"] div[role="combobox"] {
+        background-color: white !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 12px 16px !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
+    }
+    div[data-testid="stTextInput"] input:focus, 
+    div[data-testid="stNumberInput"] input:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+    }
+
+    /* Tugmalar (Buttons) premium dizayni */
+    div.stButton > button {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+        color: white !important;
+        border-radius: 14px !important;
+        border: none !important;
+        padding: 14px 28px !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.01em !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3) !important;
+        width: 100% !important;
     }
     div.stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4) !important;
+    }
+    div.stButton > button:active {
+        transform: translateY(0);
     }
 
-    /* Premium Karta Konteyneri */
-    .premium-card {
+    /* Tabs (Tablar) dizayni */
+    button[data-baseweb="tab"] {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #64748b !important;
+        border-bottom-width: 3px !important;
+        transition: all 0.2s ease !important;
+    }
+    button[aria-selected="true"] {
+        color: #4f46e5 !important;
+        border-bottom-color: #4f46e5 !important;
+    }
+
+    /* Silliq premium kartochka (Soft Premium Card) */
+    .soft-card {
+        background: white;
+        padding: 28px;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.06), 0 2px 4px -1px rgba(148, 163, 184, 0.03);
+        margin-bottom: 24px;
+    }
+
+    /* Zamonaviy Neon KPI Card */
+    .kpi-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    .kpi-card {
         background: white;
         padding: 24px;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-        margin-bottom: 20px;
+        border-radius: 24px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-4px);
     }
 
-    /* Yandex Market Style Mahsulot Kartasi */
+    /* HTML Jadvallari uchun modern dizayn (st.dataframe o'rniga) */
+    .modern-table-container {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.03);
+    }
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .modern-table th {
+        background-color: #f8fafc;
+        padding: 18px 24px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .modern-table td {
+        padding: 18px 24px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 500;
+    }
+    .modern-table tr:last-child td {
+        border-bottom: none;
+    }
+    .modern-table tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* Yandex Market Premium Card Grid */
     .yandex-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 24px;
         padding: 10px 0;
     }
     .yandex-card {
         background: white;
-        border-radius: 16px;
+        border-radius: 24px;
         border: 1px solid #e2e8f0;
         overflow: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -106,14 +214,15 @@ st.markdown("""
         flex-direction: column;
         justify-content: space-between;
         position: relative;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
     }
     .yandex-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
     }
     .yandex-img-container {
         width: 100%;
-        height: 200px;
+        height: 220px;
         background-color: #f8fafc;
         display: flex;
         align-items: center;
@@ -126,24 +235,25 @@ st.markdown("""
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .yandex-card:hover .yandex-img {
-        transform: scale(1.05);
+        transform: scale(1.08);
     }
     .yandex-badge {
         position: absolute;
-        top: 10px;
-        left: 10px;
-        padding: 4px 10px;
-        border-radius: 8px;
+        top: 12px;
+        left: 12px;
+        padding: 6px 12px;
+        border-radius: 10px;
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 800;
         color: white;
         z-index: 2;
+        letter-spacing: 0.02em;
     }
     .yandex-info {
-        padding: 15px;
+        padding: 20px;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -153,17 +263,17 @@ st.markdown("""
         font-size: 11px;
         color: #94a3b8;
         text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
     }
     .yandex-title {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
-        color: #1e293b;
-        margin: 0 0 10px 0;
-        line-height: 1.4;
-        height: 40px;
+        color: #0f172a;
+        margin: 0 0 12px 0;
+        line-height: 1.5;
+        height: 44px;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -172,18 +282,23 @@ st.markdown("""
     .yandex-price-box {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
         margin-top: auto;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
     }
     .yandex-price {
         font-size: 16px;
         font-weight: 800;
-        color: #0f172a;
+        color: #4f46e5;
     }
     .yandex-stock {
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 13px;
+        font-weight: 700;
         color: #64748b;
+        background: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 8px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -255,13 +370,13 @@ def format_money(amount):
 
 # Sidebar Brending
 st.sidebar.markdown("""
-<div style="display: flex; align-items: center; gap: 14px; padding: 15px 0 30px 0; border-bottom: 1px solid #1e293b; margin-bottom: 25px;">
-    <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 12px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
-        <span style="font-size: 22px;">⚡</span>
+<div style="display: flex; align-items: center; gap: 14px; padding: 20px 0 30px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 25px;">
+    <div style="background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%); padding: 14px; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);">
+        <span style="font-size: 24px; color: white;">⚡</span>
     </div>
     <div>
-        <h2 style="font-size: 18px; font-weight: 800; color: white; margin: 0; padding: 0; letter-spacing: -0.02em;">Smart-Ombor ERP</h2>
-        <span style="font-size: 10px; color: #818cf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">Yandex Style v3.0</span>
+        <h2 style="font-size: 19px; font-weight: 800; color: white; margin: 0; padding: 0; letter-spacing: -0.02em;">Smart-Ombor</h2>
+        <span style="font-size: 10px; color: #818cf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;">Ultra ERP v4.0</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -274,7 +389,7 @@ if rol == "🔐 Admin Rejimi":
     parol = st.sidebar.text_input("Maxfiy parolni kiriting:", type="password")
     if parol == "19920904":
         administrator_tasdiq = True
-        st.sidebar.success("🔓  MALADES PAROL TO'GRI !")
+        st.sidebar.success("🔓 ADMIN TASDIQLANDI!")
     else:
         if parol != "":
             st.sidebar.error("❌ Maxfiy parol noto'g'ri!")
@@ -289,17 +404,17 @@ if administrator_tasdiq:
 else:
     menyu = "🛍️ Yandex Katalog (Agent)"
     st.sidebar.markdown("""
-    <div style="padding: 18px; background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 14px; margin-top: 25px;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.5;">Siz hozirda <b>Agent Rejimi</b>dasiz. Sizga faqat joriy mahsulotlar rasmlari va qoldig'i ko'rsatiladi.</p>
+    <div style="padding: 18px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 18px; margin-top: 25px;">
+        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.6;">Siz hozirda <b>Agent Rejimi</b>dasiz. Sizga faqat joriy mahsulotlar rasmlari va qoldig'i ko'rsatiladi.</p>
     </div>
     """, unsafe_allow_html=True)
 
 def mahsulot_katalogini_chizish(admin_view=False):
     """Yandex.jpg dagi kabi mahsulotlarni chiroyli rasm va kartochkalar ko'rinishida chiqaradi."""
     st.markdown("""
-    <div style="margin-bottom: 25px;">
-        <h1 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.03em;">🛍️ Onlayn Katalog</h1>
-        <p style="font-size: 15px; color: #64748b; margin: 0;">Mavjud barcha mahsulotlarning vizual ko'rgazmasi va joriy zaxirasi</p>
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">🛍️ Onlayn Katalog</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Mavjud barcha mahsulotlarning vizual ko'rgazmasi va joriy zaxirasi</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -342,7 +457,7 @@ def mahsulot_katalogini_chizish(admin_view=False):
         # Status va uning rangi
         if miqdor <= 0:
             status_text = "Tugagan"
-            status_bg = "#f43f5e" # Rose
+            status_bg = "#ef4444" # Rose/Red
         elif miqdor <= 15:
             status_text = "Zaxira kam"
             status_bg = "#f59e0b" # Amber
@@ -380,8 +495,8 @@ if menyu in ["🛍️ Yandex Katalog", "🛍️ Yandex Katalog (Agent)"]:
 elif administrator_tasdiq and menyu == "📊 Boshqaruv Paneli":
     st.markdown("""
     <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.03em;">📊 Boshqaruv Paneli</h1>
-        <p style="font-size: 15px; color: #64748b; margin: 0;">Real vaqtda umumiy hisob-kitoblar va grafik tahlillar</p>
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📊 Boshqaruv Paneli</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Real vaqtda umumiy hisob-kitoblar va grafik tahlillar</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -393,13 +508,13 @@ elif administrator_tasdiq and menyu == "📊 Boshqaruv Paneli":
 
     def kpi_card(title, value, subtitle, icon, icon_color, bg_gradient):
         return f"""
-        <div style="background: white; padding: 24px; border-radius: 20px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+        <div style="background: white; padding: 26px; border-radius: 24px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);">
             <div>
-                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px;">{title}</span>
-                <h3 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0;">{value}</h3>
-                <span style="font-size: 12px; color: #64748b; display: block; margin-top: 8px;">{subtitle}</span>
+                <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 8px;">{title}</span>
+                <h3 style="font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em;">{value}</h3>
+                <span style="font-size: 13px; color: #64748b; display: block; margin-top: 10px;">{subtitle}</span>
             </div>
-            <div style="background: {bg_gradient}; padding: 14px; border-radius: 16px; color: {icon_color}; font-size: 26px; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px;">
+            <div style="background: {bg_gradient}; padding: 16px; border-radius: 20px; color: {icon_color}; font-size: 28px; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);">
                 {icon}
             </div>
         </div>
@@ -418,23 +533,32 @@ elif administrator_tasdiq and menyu == "📊 Boshqaruv Paneli":
     st.markdown("<br>", unsafe_allow_html=True)
     g1, g2 = st.columns([3, 2])
     with g1:
-        st.markdown('<div class="premium-card"><h4>📈 Mahsulotlar Miqdori Tahlili</h4></div>', unsafe_allow_html=True)
+        st.markdown('<div class="soft-card"><h4>📈 Mahsulotlar Miqdori Tahlili (Top 10)</h4></div>', unsafe_allow_html=True)
         if jami_turlar > 0:
-            st.bar_chart(data=ombor.head(10), x="Mahsulot Nomi", y="Miqdori", color="#6366f1")
+            st.bar_chart(data=ombor.head(10), x="Mahsulot Nomi", y="Miqdori", color="#4f46e5")
     with g2:
-        st.markdown('<div class="premium-card"><h4>⚠️ Zaxirasi kamaygan mahsulotlar</h4></div>', unsafe_allow_html=True)
+        st.markdown('<div class="soft-card"><h4>⚠️ Zaxirasi kamaygan mahsulotlar</h4></div>', unsafe_allow_html=True)
         kam_qoldiq = ombor[ombor["Miqdori"] <= 15]
         if not kam_qoldiq.empty:
             for _, r in kam_qoldiq.iterrows():
-                st.warning(f"🚨 **{r['Mahsulot Nomi']}**: Omborda atigi {r['Miqdori']} {r['O\'lchov Birligi']} qoldi!")
+                olchov_birligi = r["O'lchov Birligi"]
+                st.markdown(f"""
+                <div style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 6px solid #f59e0b; padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #92400e; font-size: 14px;">🚨 {r['Mahsulot Nomi']}</strong>
+                        <div style="color: #b45309; font-size: 12px; margin-top: 4px;">Tezda kirim qilish tavsiya etiladi</div>
+                    </div>
+                    <span style="background: #f59e0b; color: white; padding: 6px 12px; border-radius: 10px; font-weight: 800; font-size: 12px;">{r['Miqdori']:g} {olchov_birligi}</span>
+                </div>
+                """, unsafe_allow_html=True)
         else:
             st.success("Barcha mahsulotlar zaxirasi yetarli!")
 
 elif administrator_tasdiq and menyu == "📦 Mahsulotlar Qoldig'i":
     st.markdown("""
     <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.03em;">📦 Mahsulotlar Qoldig'i & Rasmlar</h1>
-        <p style="font-size: 15px; color: #64748b; margin: 0;">Mavjud tovarlarni boshqarish hamda rasmlarini yangilash bo'limi</p>
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📦 Mahsulotlar Qoldig'i & Rasmlar</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Mavjud tovarlarni boshqarish hamda rasmlarini yangilash bo'limi</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -454,34 +578,85 @@ elif administrator_tasdiq and menyu == "📦 Mahsulotlar Qoldig'i":
                 else:
                     st.error("Iltimos, avval rasmni tanlang!")
 
-    # Mahsulotlar Jadvali
-    st.dataframe(
-        ombor[["Kategoriya", "Mahsulot Nomi", "Miqdori", "O'lchov Birligi", "Narxi"]],
-        use_container_width=True,
-        hide_index=True
-    )
+    # Mahsulotlar Jadvali HTML formatda (Modern dizayn)
+    html_table = """
+    <div class="modern-table-container">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Turkum</th>
+                    <th>Mahsulot Nomi</th>
+                    <th>Zaxira qoldig'i</th>
+                    <th>Narxi (UZS)</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+    for idx, row in ombor.iterrows():
+        olchov_birligi = row["O'lchov Birligi"]
+        html_table += f"""
+                <tr>
+                    <td style="color: #64748b;"><span style="background: #f1f5f9; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">{row['Kategoriya']}</span></td>
+                    <td style="font-weight: 700; color: #0f172a;">{row['Mahsulot Nomi']}</td>
+                    <td style="font-weight: 800; color: {'#ef4444' if row['Miqdori'] <= 15 else '#10b981'};">{row['Miqdori']:g} {olchov_birligi}</td>
+                    <td style="font-weight: 700; color: #4f46e5;">{format_money(row['Narxi'])}</td>
+                </tr>
+        """
+    html_table += """
+            </tbody>
+        </table>
+    </div>
+    """
+    st.markdown(html_table, unsafe_allow_html=True)
 
 elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
-    st.markdown("### 👥 Agentlar va To'lovlar Tizimi")
+    st.markdown("""
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">👥 Agentlar va To'lovlar Tizimi</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Olib ketilgan mahsulotlar qarzdorliklarini tahlil qilish va qabul qilingan pullarni hisobga olish</p>
+    </div>
+    """, unsafe_allow_html=True)
+
     t1, t2 = st.tabs(["👥 Agentlar Ro'yxati", "➕ Yangi Agent & To'lov Qabul Qilish"])
     
     with t1:
         if not agentlar.empty:
+            # Agentlar ro'yxatini chiroyli modern kartochkalar shaklida chiqarish
+            agent_html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">'
             for _, r in agentlar.iterrows():
-                st.markdown(f"""
-                <div class="premium-card" style="border-left: 5px solid {'#ef4444' if r['Joriy Qarz'] > 0 else '#10b981'};">
-                    <h4>👤 {r['Agent Nomi']}</h4>
-                    <p>📞 Tel: {r['Telefon']}</p>
-                    <h5>Mavjud Qarz: {format_money(r['Joriy Qarz'])}</h5>
+                qarz_rang = '#ef4444' if r['Joriy Qarz'] > 0 else '#10b981'
+                qarz_bg = '#fef2f2' if r['Joriy Qarz'] > 0 else '#ecfdf5'
+                agent_html += f"""
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                            <div style="background: #e0e7ff; color: #4f46e5; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+                                {r['Agent Nomi'][0]}
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 800;">{r['Agent Nomi']}</h4>
+                                <span style="font-size: 12px; color: #64748b; font-weight: 600;">👤 Agent</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 13px; color: #475569; margin-bottom: 16px;">
+                            📞 Tel: <strong>{r['Telefon']}</strong>
+                        </div>
+                    </div>
+                    <div style="background: {qarz_bg}; padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Qarz:</span>
+                        <span style="font-weight: 800; color: {qarz_rang}; font-size: 14px;">{format_money(r['Joriy Qarz'])}</span>
+                    </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """
+            agent_html += '</div>'
+            st.markdown(agent_html, unsafe_allow_html=True)
         else:
             st.info("Hali hech qanday agent qo'shilmagan.")
 
     with t2:
         col_ag, col_tol = st.columns(2)
         with col_ag:
-            st.subheader("Yangi Agent qo'shish")
+            st.markdown('<div class="soft-card"><h4>👥 Yangi Agent qo\'shish</h4>', unsafe_allow_html=True)
             with st.form("agent_add_form"):
                 nomi = st.text_input("F.I.Sh:").strip().capitalize()
                 tel = st.text_input("Telefon:")
@@ -495,9 +670,10 @@ elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
                         st.rerun()
                     else:
                         st.error("Bunday agent allaqachon mavjud!")
+            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_tol:
-            st.subheader("Qarzni so'ndirish (To'lov)")
+            st.markdown('<div class="soft-card"><h4>💰 Qarzni so\'ndirish (To\'lov)</h4>', unsafe_allow_html=True)
             if not agentlar.empty:
                 with st.form("qarz_yopish_form"):
                     t_agent = st.selectbox("Agentni tanlang:", agentlar["Agent Nomi"].unique())
@@ -513,11 +689,18 @@ elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
                         }])
                         chiqim = pd.concat([chiqim, yangi_qayd], ignore_index=True)
                         bazani_saqlash(ombor, kirim, chiqim, agentlar)
-                        st.success(f"✅ Muvaffaqiyatli: {t_agent} hisobidan {format_money(summa)} qabul qilindi!")
+                        st.success(f"✅ Muvaffaqiyatli: {t_agent} hisobidan {format_money(summa)} qabul dili!")
                         st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 elif administrator_tasdiq and menyu == "📥 Yangi Kirim":
-    st.markdown("### 📥 Omborga Yangi Kirim Qilish")
+    st.markdown("""
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📥 Yangi Kirim Operatsiyasi</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Omborxonaga yangi yoki mavjud tovarlarni qabul qilish paneli</p>
+    </div>
+    """, unsafe_allow_html=True)
+
     with st.container(border=True):
         kirim_shakli = st.radio("Kirim shakli:", ["Mavjud mahsulot qoldig'ini oshirish", "Yangi mahsulot yaratish (Rasm bilan)"])
         
@@ -571,7 +754,13 @@ elif administrator_tasdiq and menyu == "📥 Yangi Kirim":
                 st.error("Barcha maydonlarni to'ldiring!")
 
 elif administrator_tasdiq and menyu == "📤 Yangi Chiqim":
-    st.markdown("### 📤 Ombordan Mahsulot Chiqim Qilish")
+    st.markdown("""
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📤 Ombardan Mahsulot Chiqim Qilish</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Tovarlarni agentlarga yuklash yoki naqd savdo qilish paneli</p>
+    </div>
+    """, unsafe_allow_html=True)
+
     if ombor.empty:
         st.warning("Omborda mahsulotlar mavjud emas.")
     else:
@@ -615,9 +804,84 @@ elif administrator_tasdiq and menyu == "📤 Yangi Chiqim":
                     st.rerun()
 
 elif administrator_tasdiq and menyu == "🕒 Amallar Tarixi":
-    st.markdown("### 🕒 Ombor Harakatlari Jurnali")
+    st.markdown("""
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">🕒 Ombor Harakatlari Jurnali</h1>
+        <p style="font-size: 16px; color: #64748b; margin: 0;">Barcha kirim va chiqim operatsiyalarining batafsil xronologiyasi</p>
+    </div>
+    """, unsafe_allow_html=True)
+
     tb1, tb2 = st.tabs(["📥 Barcha Kirimlar", "📤 Barcha Chiqimlar"])
+    
     with tb1:
-        st.dataframe(kirim.sort_values(by="Sana", ascending=False), use_container_width=True, hide_index=True)
+        if not kirim.empty:
+            kirim_sorted = kirim.sort_values(by="Sana", ascending=False)
+            html_kirim = """
+            <div class="modern-table-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Mahsulot Nomi</th>
+                            <th>Kirim Miqdori</th>
+                            <th>Mas'ul Shaxs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
+            for _, r in kirim_sorted.iterrows():
+                html_kirim += f"""
+                        <tr>
+                            <td style="color: #64748b;">{r['Sana']}</td>
+                            <td style="font-weight: 700; color: #0f172a;">{r['Mahsulot Nomi']}</td>
+                            <td style="font-weight: 800; color: #10b981;">+{r['Miqdori']:g}</td>
+                            <td style="color: #475569;">{r['Mas\'ul']}</td>
+                        </tr>
+                """
+            html_kirim += """
+                    </tbody>
+                </table>
+            </div>
+            """
+            st.markdown(html_kirim, unsafe_allow_html=True)
+        else:
+            st.info("Hozircha hech qanday kirim amalga oshirilmagan.")
+
     with tb2:
-        st.dataframe(chiqim.sort_values(by="Sana", ascending=False), use_container_width=True, hide_index=True)
+        if not chiqim.empty:
+            chiqim_sorted = chiqim.sort_values(by="Sana", ascending=False)
+            html_chiqim = """
+            <div class="modern-table-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Mahsulot Nomi</th>
+                            <th>Miqdori</th>
+                            <th>Qabul Qiluvchi</th>
+                            <th>Agent / Shart</th>
+                            <th>Jami Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
+            for _, r in chiqim_sorted.iterrows():
+                summa_str = format_money(r['Jami Summa']) if r['Jami Summa'] >= 0 else format_money(abs(r['Jami Summa'])) + " (Qaytarildi)"
+                html_chiqim += f"""
+                        <tr>
+                            <td style="color: #64748b;">{r['Sana']}</td>
+                            <td style="font-weight: 700; color: #0f172a;">{r['Mahsulot Nomi']}</td>
+                            <td style="font-weight: 800; color: #ef4444;">-{r['Miqdori']:g}</td>
+                            <td style="color: #475569;">{r['Qabul qiluvchi']}</td>
+                            <td><span style="background: #eff6ff; color: #3b82f6; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">{r['Agent']}</span></td>
+                            <td style="font-weight: 700; color: #4f46e5;">{summa_str}</td>
+                        </tr>
+                """
+            html_chiqim += """
+                    </tbody>
+                </table>
+            </div>
+            """
+            st.markdown(html_chiqim, unsafe_allow_html=True)
+        else:
+            st.info("Hozircha hech qanday chiqim amalga oshirilmagan.")
