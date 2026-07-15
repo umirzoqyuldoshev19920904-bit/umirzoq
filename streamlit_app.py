@@ -153,7 +153,7 @@ administrator_tasdiq = False
 
 if rol == "🔐 Admin Rejimi (To'liq ERP)":
     parol = st.sidebar.text_input("Maxfiy parolni kiriting:", type="password")
-    if parol == "1234":
+    if parol == "19920904":
         administrator_tasdiq = True
         st.sidebar.success("Kirish muvaffaqiyatli!")
     else:
