@@ -1,102 +1,103 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-from datetime import datetime
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra ERP - Professional Boshqaruv</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        [x-cloak] { display: none !important; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800" x-data="erpSystem()">
 
-# 1. Sahifa sozlamalari
-st.set_page_config(page_title="Smart-Ombor ERP v5.0", layout="wide", page_icon="⚡")
+    <div class="min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white p-6 flex flex-col hidden md:flex">
+            <h2 class="text-2xl font-bold mb-8 text-blue-400"><i class="fas fa-warehouse mr-2"></i>Ultra ERP</h2>
+            <nav class="space-y-4">
+                <template x-for="link in ['Dashboard', 'Mahsulotlar', 'Agentlar', 'Moliya']">
+                    <button @click="activeTab = link" :class="activeTab === link ? 'text-blue-400' : 'text-slate-400'" class="block text-left hover:text-white transition">
+                        <i :class="link === 'Dashboard' ? 'fa-chart-line' : (link === 'Mahsulotlar' ? 'fa-boxes' : 'fa-users')" class="fas mr-3"></i>
+                        <span x-text="link"></span>
+                    </button>
+                </template>
+            </nav>
+        </aside>
 
-# 2. Zamonaviy CSS dizayn (Glassmorphism & SaaS look)
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-    
-    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-    
-    /* Top Menu Styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: #f1f5f9;
-        padding: 8px;
-        border-radius: 12px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: transparent;
-        border-radius: 8px;
-        font-weight: 600;
-        color: #475569;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: white !important;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        color: #0f172a !important;
-    }
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold" x-text="activeTab"></h1>
+                <div class="bg-white px-4 py-2 rounded-lg shadow-sm font-semibold">Admin: Karim</div>
+            </header>
 
-    /* Floating Cards */
-    .stApp { background-color: #f8fafc; }
-    .floating-card {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
-    }
-</style>
-""", unsafe_allow_html=True)
+            <div x-show="activeTab === 'Dashboard'" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                        <p class="text-sm text-slate-500">Bugungi Foyda</p>
+                        <h3 class="text-2xl font-bold" x-text="stats.dailyProfit + ' UZS'"></h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+                        <p class="text-sm text-slate-500">Oylik Foyda</p>
+                        <h3 class="text-2xl font-bold" x-text="stats.monthlyProfit + ' UZS'"></h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
+                        <p class="text-sm text-slate-500">Jami Yillik</p>
+                        <h3 class="text-2xl font-bold" x-text="stats.yearlyProfit + ' UZS'"></h3>
+                    </div>
+                </div>
+                
+                <!-- Chart Area -->
+                <div class="bg-white p-6 rounded-xl shadow-md h-64">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
 
-# 3. Ma'lumotlar bazasi (Sessiya xotirasida)
-if 'ombor' not in st.session_state:
-    st.session_state.ombor = pd.DataFrame(columns=["Mahsulot", "Soni", "Narxi", "Kategoriya"])
-    st.session_state.tarix = pd.DataFrame(columns=["Vaqt", "Amal", "Mahsulot", "Soni"])
+            <div x-show="activeTab === 'Agentlar'" class="bg-white p-6 rounded-xl shadow-md">
+                <table class="w-full text-left">
+                    <thead><tr class="border-b"><th class="py-3">Agent</th><th class="py-3">Balance</th><th class="py-3">Status</th></tr></thead>
+                    <tbody>
+                        <template x-for="agent in agents">
+                            <tr class="border-b">
+                                <td class="py-3" x-text="agent.name"></td>
+                                <td class="py-3" x-text="agent.balance + ' UZS'"></td>
+                                <td class="py-3"><span :class="agent.balance > 0 ? 'text-green-500' : 'text-red-500'" x-text="agent.balance > 0 ? 'Foydali' : 'Qarzdor'"></span></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 
-# 4. Top Menu (Asosiy Navigatsiya)
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Boshqaruv (Dashboard)", "🛍️ Mahsulotlar Katalogi", "📥 Kirim/Chiqim", "👥 Hamkorlar"])
-
-with tab1:
-    st.header("Umumiy Ko'rsatkichlar")
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Jami Tovar", len(st.session_state.ombor))
-    c2.metric("Jami Qiymat", "125,000,000 UZS")
-    c3.metric("Bugungi Amallar", len(st.session_state.tarix))
-    
-    st.markdown("---")
-    if not st.session_state.ombor.empty:
-        fig = px.bar(st.session_state.ombor, x="Mahsulot", y="Soni", color="Kategoriya", title="Mahsulotlar Taqqoslanishi")
-        st.plotly_chart(fig, use_container_width=True)
-
-with tab2:
-    st.header("Katalog")
-    if st.session_state.ombor.empty:
-        st.info("Hozircha mahsulotlar yo'q.")
-    else:
-        st.dataframe(st.session_state.ombor, use_container_width=True)
-
-with tab3:
-    st.header("Operatsiyalar")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        with st.form("yangi_kirim"):
-            st.subheader("Yangi Mahsulot Kirimi")
-            nom = st.text_input("Nomi")
-            soni = st.number_input("Miqdori", 1)
-            narx = st.number_input("Narxi", 1000)
-            kat = st.selectbox("Kategoriya", ["Qurilish", "Elektro", "Santexnika"])
-            if st.form_submit_button("Saqlash"):
-                yangi = pd.DataFrame([[nom, soni, narx, kat]], columns=["Mahsulot", "Soni", "Narxi", "Kategoriya"])
-                st.session_state.ombor = pd.concat([st.session_state.ombor, yangi])
-                st.success("Kiritildi!")
-                st.rerun()
-
-with tab4:
-    st.header("Hamkorlar va Yetkazuvchilar")
-    st.warning("Bu bo'limda hamkorlar ro'yxati va ularning qarzlari aks etadi.")
-```
-
-### GitHub'ga yuklash bo'yicha qisqacha yo'riqnoma:
-1. **GitHub Repository:** Yangi repo yarating (masalan, `smart-ombor-erp`).
-2. **Fayl qo'shish:** `streamlit_app.py` nomli fayl yarating va yuqoridagi kodni ichiga joylang.
-3. **Streamlit Cloud:** [share.streamlit.io](https://share.streamlit.io) saytiga kiring.
-4. **Deploy:** GitHub repositoriyangizni tanlang va "Deploy" tugmasini bosing.
-
-Endi sizda "Moy Sklad" kabi yuqori menyuli, professional va zamonaviy ERP tizimingiz bor! Yana biror bo'lim (masalan, grafiklar) bo'yicha murakkablik kerak bo'lsa, ayting, darhol qo'shib beraman.
+    <script>
+        function erpSystem() {
+            return {
+                activeTab: 'Dashboard',
+                stats: { dailyProfit: '1,200,000', monthlyProfit: '45,000,000', yearlyProfit: '540,000,000' },
+                agents: [
+                    { name: 'Aliyev B.', balance: 500000 },
+                    { name: 'Karimov S.', balance: -200000 }
+                ],
+                init() {
+                    const ctx = document.getElementById('mainChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                            datasets: [{ label: 'Savdo', data: [1200, 1900, 3000, 2500, 4000], borderColor: '#3b82f6', tension: 0.4 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
