@@ -1,210 +1,185 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
 import base64
 
-# Sahifaning yuqori sozlamalari
 st.set_page_config(
-    page_title="Smart-Ombor Ultra ERP v4.0",
+    page_title="Smart-Ombor Ultra ERP v5.0",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# Custom Premium CSS - Streamlit elementlarini butunlay o'zgartirish va brend dizayn berish
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     
-    /* Umumiy fon sozlamalari */
+    /* Global Styles */
     .stApp {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        background-color: #f8fafc !important;
+        background-color: #f1f5f9 !important;
     }
     
-    /* Streamlit menyulari va keraksiz elementlarni yashirish */
+    /* Hide Streamlit default styling elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Sidebar premium dizayni */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
-        border-right: 1px solid #334155 !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: #f1f5f9 !important;
+    /* Moy Sklad Inspired Top Bar Menu */
+    .top-navbar {
+        background: linear-gradient(90deg, #1e3a8a 0%, #0d9488 100%);
+        padding: 15px 30px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* Sidebar navigatsiya tugmalari dizayni */
-    div[data-testid="stSidebarUserContent"] div[role="radiogroup"] {
-        gap: 12px !important;
-        padding-top: 10px;
+    .brand-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
-    div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label {
-        background-color: rgba(30, 41, 59, 0.7) !important;
-        color: #94a3b8 !important;
-        border-radius: 16px !important;
-        padding: 14px 18px !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        font-weight: 600 !important;
-        font-size: 14px !important;
-        cursor: pointer !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        width: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    
+    .brand-logo {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 12px;
+        font-size: 20px;
+        backdrop-filter: blur(10px);
     }
-    div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label[data-checked="true"] {
-        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
-        color: white !important;
-        border-color: #6366f1 !important;
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4) !important;
-        transform: translateY(-2px);
+    
+    .brand-title {
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 20px;
+        margin: 0;
+        letter-spacing: -0.02em;
     }
-    div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label:hover {
-        background-color: #1e293b !important;
-        color: #f1f5f9 !important;
-        transform: translateY(-1px);
-    }
-    div[data-testid="stSidebarUserContent"] div[role="radiogroup"] label div[role="presentation"] {
-        display: none !important;
+    
+    .brand-subtitle {
+        color: #99f6e4 !important;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        display: block;
     }
 
-    /* Streamlit kiritish maydonlari (Inputs) dizaynini modernizatsiya qilish */
+    /* Floating Glass Cards */
+    .floating-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 24px;
+    }
+    
+    .floating-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    /* Premium Styled Inputs */
     div[data-testid="stTextInput"] input, 
     div[data-testid="stNumberInput"] input,
     div[data-testid="stSelectbox"] div[role="combobox"] {
-        background-color: white !important;
-        border: 1px solid #e2e8f0 !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 14px !important;
         padding: 12px 16px !important;
         font-weight: 500 !important;
-        color: #1e293b !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-        transition: all 0.2s ease !important;
+        color: #0f172a !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.25s ease !important;
     }
+    
     div[data-testid="stTextInput"] input:focus, 
     div[data-testid="stNumberInput"] input:focus {
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+        border-color: #0d9488 !important;
+        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15) !important;
     }
 
-    /* Tugmalar (Buttons) premium dizayni */
+    /* Premium Buttons */
     div.stButton > button {
-        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+        background: linear-gradient(135deg, #0d9488 0%, #1e3a8a 100%) !important;
         color: white !important;
         border-radius: 14px !important;
         border: none !important;
         padding: 14px 28px !important;
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: 700 !important;
-        letter-spacing: -0.01em !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 10px 15px -3px rgba(13, 148, 136, 0.3) !important;
         width: 100% !important;
     }
+    
     div.stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4) !important;
-    }
-    div.stButton > button:active {
-        transform: translateY(0);
+        box-shadow: 0 20px 25px -5px rgba(13, 148, 136, 0.4) !important;
     }
 
-    /* Tabs (Tablar) dizayni */
-    button[data-baseweb="tab"] {
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        color: #64748b !important;
-        border-bottom-width: 3px !important;
-        transition: all 0.2s ease !important;
-    }
-    button[aria-selected="true"] {
-        color: #4f46e5 !important;
-        border-bottom-color: #4f46e5 !important;
-    }
-
-    /* Silliq premium kartochka (Soft Premium Card) */
-    .soft-card {
-        background: white;
-        padding: 28px;
-        border-radius: 24px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.06), 0 2px 4px -1px rgba(148, 163, 184, 0.03);
-        margin-bottom: 24px;
-    }
-
-    /* Zamonaviy Neon KPI Card */
-    .kpi-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        margin-bottom: 25px;
-    }
-    .kpi-card {
-        background: white;
-        padding: 24px;
-        border-radius: 24px;
-        border: 1px solid #f1f5f9;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: transform 0.3s ease;
-    }
-    .kpi-card:hover {
-        transform: translateY(-4px);
-    }
-
-    /* HTML Jadvallari uchun modern dizayn (st.dataframe o'rniga) */
+    /* Modern Table with hover lift */
     .modern-table-container {
         width: 100%;
         overflow-x: auto;
         border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        background: white;
-        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.03);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px -15px rgba(0,0,0,0.05);
     }
+    
     .modern-table {
         width: 100%;
         border-collapse: collapse;
         text-align: left;
     }
+    
     .modern-table th {
-        background-color: #f8fafc;
+        background-color: rgba(241, 245, 249, 0.8);
         padding: 18px 24px;
-        font-size: 13px;
-        font-weight: 700;
-        color: #475569;
+        font-size: 12px;
+        font-weight: 800;
+        color: #334155;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         border-bottom: 1px solid #e2e8f0;
     }
+    
     .modern-table td {
         padding: 18px 24px;
         font-size: 14px;
-        color: #334155;
+        color: #1e293b;
         border-bottom: 1px solid #f1f5f9;
         font-weight: 500;
+        transition: all 0.15s ease;
     }
-    .modern-table tr:last-child td {
-        border-bottom: none;
-    }
-    .modern-table tr:hover {
-        background-color: #f8fafc;
+    
+    .modern-table tr:hover td {
+        background-color: rgba(248, 250, 252, 0.9);
+        color: #0f172a;
     }
 
-    /* Yandex Market Premium Card Grid */
-    .yandex-grid {
+    /* Marketplace Yandex-like Grid Layout */
+    .catalog-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 24px;
-        padding: 10px 0;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 25px;
+        padding: 15px 0;
     }
-    .yandex-card {
+    
+    .catalog-card {
         background: white;
         border-radius: 24px;
         border: 1px solid #e2e8f0;
@@ -214,15 +189,18 @@ st.markdown("""
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
     }
-    .yandex-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    
+    .catalog-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 35px -10px rgba(0, 0, 0, 0.08);
+        border-color: #0d9488;
     }
-    .yandex-img-container {
+    
+    .catalog-img-container {
         width: 100%;
-        height: 220px;
+        height: 200px;
         background-color: #f8fafc;
         display: flex;
         align-items: center;
@@ -231,16 +209,14 @@ st.markdown("""
         position: relative;
         border-bottom: 1px solid #f1f5f9;
     }
-    .yandex-img {
+    
+    .catalog-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .yandex-card:hover .yandex-img {
-        transform: scale(1.08);
-    }
-    .yandex-badge {
+    
+    .catalog-badge {
         position: absolute;
         top: 12px;
         left: 12px;
@@ -250,55 +226,6 @@ st.markdown("""
         font-weight: 800;
         color: white;
         z-index: 2;
-        letter-spacing: 0.02em;
-    }
-    .yandex-info {
-        padding: 20px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    .yandex-cat {
-        font-size: 11px;
-        color: #94a3b8;
-        text-transform: uppercase;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        margin-bottom: 6px;
-    }
-    .yandex-title {
-        font-size: 15px;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0 0 12px 0;
-        line-height: 1.5;
-        height: 44px;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-    .yandex-price-box {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: auto;
-        border-top: 1px solid #f1f5f9;
-        padding-top: 14px;
-    }
-    .yandex-price {
-        font-size: 16px;
-        font-weight: 800;
-        color: #4f46e5;
-    }
-    .yandex-stock {
-        font-size: 13px;
-        font-weight: 700;
-        color: #64748b;
-        background: #f1f5f9;
-        padding: 4px 8px;
-        border-radius: 8px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -307,7 +234,6 @@ FAYL_OMBOR = "onlayn_ombor.xlsx"
 DEFAULT_PLACEHOLDER = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=300"
 
 def bazani_yuklash():
-    """Barcha zaruriy ma'lumotlar jadvallarini Exceldan yuklaydi yoki yaratadi."""
     if os.path.exists(FAYL_OMBOR):
         try:
             ombor_df = pd.read_excel(FAYL_OMBOR, sheet_name="Ombor")
@@ -319,7 +245,6 @@ def bazani_yuklash():
             except Exception:
                 agent_df = pd.DataFrame(columns=["Agent Nomi", "Telefon", "Joriy Qarz"])
             
-            # Yangi rasm ustunini tekshirish va qo'shish
             if "Rasm" not in ombor_df.columns:
                 ombor_df["Rasm"] = ""
             
@@ -337,7 +262,7 @@ def bazani_yuklash():
             
             return ombor_df, kirim_df, chiqim_df, agent_df
         except Exception as e:
-            st.error(f"Baza yuklanishida xatolik yuz berdi: {e}. Yangi baza tuzilmoqda...")
+            st.error(f"Baza yuklanishida xatolik: {e}")
             
     ombor_df = pd.DataFrame(columns=["Mahsulot Nomi", "Miqdori", "O'lchov Birligi", "Narxi", "Kategoriya", "Rasm"])
     kirim_df = pd.DataFrame(columns=["Sana", "Mahsulot Nomi", "Miqdori", "Mas'ul"])
@@ -346,18 +271,15 @@ def bazani_yuklash():
     return ombor_df, kirim_df, chiqim_df, agent_df
 
 def bazani_saqlash(ombor, kirim, chiqim, agentlar):
-    """Barcha o'zgarishlarni Excelga mukammal tarzda yozadi."""
     with pd.ExcelWriter(FAYL_OMBOR, engine="openpyxl") as writer:
         ombor.to_excel(writer, sheet_name="Ombor", index=False)
         kirim.to_excel(writer, sheet_name="Kirim", index=False)
         chiqim.to_excel(writer, sheet_name="Chiqim", index=False)
         agentlar.to_excel(writer, sheet_name="Agentlar", index=False)
 
-# Ma'lumotlarni xotiraga chaqirish
 ombor, kirim, chiqim, agentlar = bazani_yuklash()
 
 def to_base64(uploaded_file):
-    """Yuklangan rasm faylini Base64 formatiga o'tkazadi."""
     if uploaded_file is not None:
         file_bytes = uploaded_file.read()
         b64_string = base64.b64encode(file_bytes).decode("utf-8")
@@ -368,21 +290,24 @@ def to_base64(uploaded_file):
 def format_money(amount):
     return f"{amount:,.0f} UZS".replace(",", " ")
 
-# Sidebar Brending
-st.sidebar.markdown("""
-<div style="display: flex; align-items: center; gap: 14px; padding: 20px 0 30px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 25px;">
-    <div style="background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%); padding: 14px; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);">
-        <span style="font-size: 24px; color: white;">⚡</span>
+st.markdown("""
+<div class="top-navbar">
+    <div class="brand-section">
+        <div class="brand-logo">⚡</div>
+        <div>
+            <h1 class="brand-title">Smart-Ombor ERP</h1>
+            <span class="brand-subtitle">Moy Sklad Premium v5.0</span>
+        </div>
     </div>
-    <div>
-        <h2 style="font-size: 19px; font-weight: 800; color: white; margin: 0; padding: 0; letter-spacing: -0.02em;">Smart-Ombor</h2>
-        <span style="font-size: 10px; color: #818cf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;">Ultra ERP v4.0</span>
+    <div style="color: white; font-weight: 500; font-size: 14px;">
+        <i class="fa-regular fa-clock"></i> Tezkor Operatsiyalar va Onlayn Hisob-Kitob
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Kirish roli
-rol = st.sidebar.radio("🔑 TIZIMGA KIRISH REJIMI", ["👤 Agent Rejimi", "🔐 Admin Rejimi"])
+# Login and role assignment via sidebar
+st.sidebar.markdown("### 🔐 TIZIMGA KIRISH")
+rol = st.sidebar.radio("Kirish rejimini tanlang:", ["👤 Agent Rejimi", "🔐 Admin Rejimi"])
 administrator_tasdiq = False
 
 if rol == "🔐 Admin Rejimi":
@@ -393,9 +318,8 @@ if rol == "🔐 Admin Rejimi":
     else:
         if parol != "":
             st.sidebar.error("❌ Maxfiy parol noto'g'ri!")
-        st.sidebar.info("Agent rejimidan foydalanish uchun yuqoridagi 'Agent Rejimi' tugmasini bosing.")
 
-# Rolga muvofiq navigatsiya menyusini yaratish
+# Navigation Menus
 if administrator_tasdiq:
     menyu = st.sidebar.radio(
         "ASOSIY BO'LIMLAR",
@@ -404,29 +328,26 @@ if administrator_tasdiq:
 else:
     menyu = "🛍️ Yandex Katalog (Agent)"
     st.sidebar.markdown("""
-    <div style="padding: 18px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 18px; margin-top: 25px;">
-        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.6;">Siz hozirda <b>Agent Rejimi</b>dasiz. Sizga faqat joriy mahsulotlar rasmlari va qoldig'i ko'rsatiladi.</p>
+    <div style="padding: 15px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; margin-top: 15px;">
+        <p style="font-size: 12px; color: #cbd5e1; margin: 0;">Siz <b>Agent Rejimi</b>dasiz. Faqat qoldiqlar va mahsulot katalogini ko'rishingiz mumkin.</p>
     </div>
     """, unsafe_allow_html=True)
 
 def mahsulot_katalogini_chizish(admin_view=False):
-    """Yandex.jpg dagi kabi mahsulotlarni chiroyli rasm va kartochkalar ko'rinishida chiqaradi."""
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">🛍️ Onlayn Katalog</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Mavjud barcha mahsulotlarning vizual ko'rgazmasi va joriy zaxirasi</p>
+    <div class="floating-card" style="margin-bottom: 25px;">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">🛍️ Onlayn Mahsulotlar Katalogi</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Mavjud barcha mahsulotlarning joriy ombor zaxiralari va vizual galereyasi</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Qidiruv va Toifa filtri
     col_q, col_t = st.columns([3, 1])
     with col_q:
-        qidiruv_txt = st.text_input("🔍 Mahsulot nomi bo'yicha qidirish...", placeholder="Masalan: Armatura, Kabel...")
+        qidiruv_txt = st.text_input("🔍 Mahsulot nomi bo'yicha qidirish...", placeholder="Kabel, Sement, Armatura...")
     with col_t:
         toifa_turlari = ["Barchasi"] + list(ombor["Kategoriya"].unique()) if not ombor.empty else ["Barchasi"]
         tanlangan_toifa = st.selectbox("Turkum bo'yicha saralash:", toifa_turlari)
 
-    # Filtrlash
     filtr_ombor = ombor.copy()
     if qidiruv_txt:
         filtr_ombor = filtr_ombor[filtr_ombor["Mahsulot Nomi"].str.lower().str.contains(qidiruv_txt.lower())]
@@ -434,73 +355,62 @@ def mahsulot_katalogini_chizish(admin_view=False):
         filtr_ombor = filtr_ombor[filtr_ombor["Kategoriya"] == tanlangan_toifa]
 
     if filtr_ombor.empty:
-        st.info("Katalogda hech qanday mahsulot topilmadi.")
+        st.info("Katalogda qidiruv bo'yicha mahsulot topilmadi.")
         return
 
-    # Kartochkalar to'plamini chizish
-    html_cards = '<div class="yandex-grid">'
-    
+    html_cards = '<div class="catalog-grid">'
     for idx, row in filtr_ombor.iterrows():
-        # Rasm mavjudligini tekshirish
         rasm_src = row["Rasm"] if row["Rasm"] != "" else DEFAULT_PLACEHOLDER
         nomi = row["Mahsulot Nomi"]
         kat = row["Kategoriya"]
         miqdor = row["Miqdori"]
         birligi = row["O'lchov Birligi"]
         
-        # Narxni faqat admin ko'ra oladi
-        if admin_view:
-            narx_str = format_money(row["Narxi"])
-        else:
-            narx_str = "Sotuvda"
+        narx_str = format_money(row["Narxi"]) if admin_view else "Sotuvda"
 
-        # Status va uning rangi
         if miqdor <= 0:
             status_text = "Tugagan"
-            status_bg = "#ef4444" # Rose/Red
+            status_bg = "#ef4444"
         elif miqdor <= 15:
             status_text = "Zaxira kam"
-            status_bg = "#f59e0b" # Amber
+            status_bg = "#f59e0b"
         else:
             status_text = "Mavjud"
-            status_bg = "#10b981" # Emerald
+            status_bg = "#10b981"
 
-        # Kartochka HTML
         html_cards += f"""
-        <div class="yandex-card">
-            <div class="yandex-img-container">
-                <span class="yandex-badge" style="background-color: {status_bg};">{status_text}</span>
-                <img src="{rasm_src}" class="yandex-img" alt="{nomi}" />
+        <div class="catalog-card">
+            <div class="catalog-img-container">
+                <span class="catalog-badge" style="background-color: {status_bg};">{status_text}</span>
+                <img src="{rasm_src}" class="catalog-img" alt="{nomi}" />
             </div>
-            <div class="yandex-info">
+            <div style="padding: 18px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div class="yandex-cat">{kat}</div>
-                    <h3 class="yandex-title">{nomi}</h3>
+                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 4px;">{kat}</div>
+                    <h3 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 10px 0; line-height: 1.4;">{nomi}</h3>
                 </div>
-                <div class="yandex-price-box">
-                    <span class="yandex-price">{narx_str}</span>
-                    <span class="yandex-stock">{miqdor:g} {birligi}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: auto;">
+                    <span style="font-size: 15px; font-weight: 800; color: #0d9488;">{narx_str}</span>
+                    <span style="font-size: 12px; font-weight: 700; color: #475569; background: #e2e8f0; padding: 4px 8px; border-radius: 8px;">{miqdor:g} {birligi}</span>
                 </div>
             </div>
         </div>
         """
-    
     html_cards += '</div>'
     st.markdown(html_cards, unsafe_allow_html=True)
 
-# Sahifalar yo'nalishi
 if menyu in ["🛍️ Yandex Katalog", "🛍️ Yandex Katalog (Agent)"]:
     mahsulot_katalogini_chizish(admin_view=administrator_tasdiq)
 
 elif administrator_tasdiq and menyu == "📊 Boshqaruv Paneli":
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📊 Boshqaruv Paneli</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Real vaqtda umumiy hisob-kitoblar va grafik tahlillar</p>
+    <div class="floating-card">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">📊 Boshqaruv Dashboard</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Real vaqt rejimidagi umumiy hisob-kitoblar va oylik aylanma</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # KPIs
+    # Calculate KPIs
     jami_turlar = len(ombor)
     jami_dona = int(ombor["Miqdori"].sum()) if jami_turlar > 0 else 0
     jami_qiymat = (ombor["Miqdori"] * ombor["Narxi"]).sum() if jami_turlar > 0 else 0
@@ -508,13 +418,13 @@ elif administrator_tasdiq and menyu == "📊 Boshqaruv Paneli":
 
     def kpi_card(title, value, subtitle, icon, icon_color, bg_gradient):
         return f"""
-        <div style="background: white; padding: 26px; border-radius: 24px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);">
+        <div class="floating-card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
             <div>
-                <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 8px;">{title}</span>
-                <h3 style="font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em;">{value}</h3>
-                <span style="font-size: 13px; color: #64748b; display: block; margin-top: 10px;">{subtitle}</span>
+                <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">{title}</span>
+                <h3 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em;">{value}</h3>
+                <span style="font-size: 12px; color: #64748b; display: block; margin-top: 8px;">{subtitle}</span>
             </div>
-            <div style="background: {bg_gradient}; padding: 16px; border-radius: 20px; color: {icon_color}; font-size: 28px; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);">
+            <div style="background: {bg_gradient}; padding: 14px; border-radius: 18px; color: {icon_color}; font-size: 24px; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px;">
                 {icon}
             </div>
         </div>
@@ -522,63 +432,56 @@ elif administrator_tasdiq and menyu == "📊 Boshqaruv Paneli":
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(kpi_card("Maxsulot turlari", f"{jami_turlar} xil", "Mavjud tovarlar", "📦", "#4f46e5", "linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)"), unsafe_allow_html=True)
+        st.markdown(kpi_card("MAHSULOT TURLARI", f"{jami_turlar} xil", "Joriy turkumlar", "📦", "#0d9488", "linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)"), unsafe_allow_html=True)
     with c2:
-        st.markdown(kpi_card("Umumiy qoldiq", f"{jami_dona} dona", "Barcha zaxira", "📊", "#10b981", "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)"), unsafe_allow_html=True)
+        st.markdown(kpi_card("UMUMIY QOLDIQ", f"{jami_dona} dona", "Ombor hajmi", "📊", "#3b82f6", "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)"), unsafe_allow_html=True)
     with c3:
-        st.markdown(kpi_card("Ombor qiymati", format_money(jami_qiymat), "Sotish qiymatida", "💰", "#f59e0b", "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)"), unsafe_allow_html=True)
+        st.markdown(kpi_card("OMBOR QIYMATI", format_money(jami_qiymat), "Sotuv bahosida", "💰", "#f59e0b", "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)"), unsafe_allow_html=True)
     with c4:
-        st.markdown(kpi_card("Yig'iladigan qarzlar", format_money(jami_agent_qarzlari), "Agentlardagi haqqimiz", "👥", "#ef4444", "linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%)"), unsafe_allow_html=True)
+        st.markdown(kpi_card("AGENTLAR QARZI", format_money(jami_agent_qarzlari), "Yig'ilishi kerak", "👥", "#ef4444", "linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%)"), unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     g1, g2 = st.columns([3, 2])
     with g1:
-        st.markdown('<div class="soft-card"><h4>📈 Mahsulotlar Miqdori Tahlili (Top 10)</h4></div>', unsafe_allow_html=True)
+        st.markdown('<div class="floating-card"><h4>📈 Top 10 Mahsulot Qoldig\'i</h4>', unsafe_allow_html=True)
         if jami_turlar > 0:
-            st.bar_chart(data=ombor.head(10), x="Mahsulot Nomi", y="Miqdori", color="#4f46e5")
+            st.bar_chart(data=ombor.head(10), x="Mahsulot Nomi", y="Miqdori", color="#0d9488")
+        st.markdown('</div>', unsafe_allow_html=True)
     with g2:
-        st.markdown('<div class="soft-card"><h4>⚠️ Zaxirasi kamaygan mahsulotlar</h4></div>', unsafe_allow_html=True)
+        st.markdown('<div class="floating-card"><h4>⚠️ Minimal Zaxira Ogohlantirishi</h4>', unsafe_allow_html=True)
         kam_qoldiq = ombor[ombor["Miqdori"] <= 15]
         if not kam_qoldiq.empty:
             for _, r in kam_qoldiq.iterrows():
-                olchov_birligi = r["O'lchov Birligi"]
                 st.markdown(f"""
-                <div style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 6px solid #f59e0b; padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong style="color: #92400e; font-size: 14px;">🚨 {r['Mahsulot Nomi']}</strong>
-                        <div style="color: #b45309; font-size: 12px; margin-top: 4px;">Tezda kirim qilish tavsiya etiladi</div>
-                    </div>
-                    <span style="background: #f59e0b; color: white; padding: 6px 12px; border-radius: 10px; font-weight: 800; font-size: 12px;">{r['Miqdori']:g} {olchov_birligi}</span>
+                <div style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 5px solid #f59e0b; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #92400e; font-weight: 700; font-size: 13px;">🚨 {r['Mahsulot Nomi']}</span>
+                    <span style="background: #f59e0b; color: white; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 11px;">{r['Miqdori']:g} {r['O\'lchov Birligi']}</span>
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.success("Barcha mahsulotlar zaxirasi yetarli!")
+            st.success("Zaxira yetarli darajada xavfsiz!")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 elif administrator_tasdiq and menyu == "📦 Mahsulotlar Qoldig'i":
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📦 Mahsulotlar Qoldig'i & Rasmlar</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Mavjud tovarlarni boshqarish hamda rasmlarini yangilash bo'limi</p>
+    <div class="floating-card">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">📦 Mahsulotlar Balansi & Rasmlar</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Mavjud tovarlar ro'yxati hamda ularning rasmlarini tahrirlash</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # 🖼️ Rasm tahrirlash expanderi
-    with st.expander("🖼️ Mahsulot rasmiga o'zgartirish kiritish / yangilash"):
+    with st.expander("🖼️ Mahsulot rasmiga o'zgartirish kiritish"):
         if not ombor.empty:
-            tanlangan_prod = st.selectbox("Rasmini yangilamoqchi bo'lgan mahsulotingizni tanlang:", ombor["Mahsulot Nomi"].unique())
-            yangi_rasm_fayl = st.file_uploader("Yangi rasm yuklang (PNG, JPG, JPEG):", type=["png", "jpg", "jpeg"], key="edit_img")
-            
+            tanlangan_prod = st.selectbox("Mahsulotni tanlang:", ombor["Mahsulot Nomi"].unique())
+            yangi_rasm_fayl = st.file_uploader("Yangi rasm yuklang (PNG, JPG, JPEG):", type=["png", "jpg", "jpeg"], key="edit_img_u")
             if st.button("Rasmni saqlash"):
                 if yangi_rasm_fayl:
                     b64_str = to_base64(yangi_rasm_fayl)
                     ombor.loc[ombor["Mahsulot Nomi"] == tanlangan_prod, "Rasm"] = b64_str
                     bazani_saqlash(ombor, kirim, chiqim, agentlar)
-                    st.success(f"✅ '{tanlangan_prod}' mahsulotining rasmi muvaffaqiyatli yangilandi!")
+                    st.success(f"✅ '{tanlangan_prod}' rasmi muvaffaqiyatli yuklandi!")
                     st.rerun()
-                else:
-                    st.error("Iltimos, avval rasmni tanlang!")
 
-    # Mahsulotlar Jadvali HTML formatda (Modern dizayn)
     html_table = """
     <div class="modern-table-container">
         <table class="modern-table">
@@ -586,20 +489,19 @@ elif administrator_tasdiq and menyu == "📦 Mahsulotlar Qoldig'i":
                 <tr>
                     <th>Turkum</th>
                     <th>Mahsulot Nomi</th>
-                    <th>Zaxira qoldig'i</th>
+                    <th>Zaxira Qoldig'i</th>
                     <th>Narxi (UZS)</th>
                 </tr>
             </thead>
             <tbody>
     """
     for idx, row in ombor.iterrows():
-        olchov_birligi = row["O'lchov Birligi"]
         html_table += f"""
                 <tr>
-                    <td style="color: #64748b;"><span style="background: #f1f5f9; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">{row['Kategoriya']}</span></td>
+                    <td><span style="background: #f1f5f9; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px; color: #475569;">{row['Kategoriya']}</span></td>
                     <td style="font-weight: 700; color: #0f172a;">{row['Mahsulot Nomi']}</td>
-                    <td style="font-weight: 800; color: {'#ef4444' if row['Miqdori'] <= 15 else '#10b981'};">{row['Miqdori']:g} {olchov_birligi}</td>
-                    <td style="font-weight: 700; color: #4f46e5;">{format_money(row['Narxi'])}</td>
+                    <td style="font-weight: 800; color: {'#ef4444' if row['Miqdori'] <= 15 else '#10b981'};">{row['Miqdori']:g} {row['O\'lchov Birligi']}</td>
+                    <td style="font-weight: 700; color: #0d9488;">{format_money(row['Narxi'])}</td>
                 </tr>
         """
     html_table += """
@@ -611,9 +513,9 @@ elif administrator_tasdiq and menyu == "📦 Mahsulotlar Qoldig'i":
 
 elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">👥 Agentlar va To'lovlar Tizimi</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Olib ketilgan mahsulotlar qarzdorliklarini tahlil qilish va qabul qilingan pullarni hisobga olish</p>
+    <div class="floating-card">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">👥 Agentlar va To'lovlar Tizimi</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Agentlar joriy hisob-kitob balansi hamda qarz yopish operatsiyalari</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -621,26 +523,23 @@ elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
     
     with t1:
         if not agentlar.empty:
-            # Agentlar ro'yxatini chiroyli modern kartochkalar shaklida chiqarish
             agent_html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">'
             for _, r in agentlar.iterrows():
                 qarz_rang = '#ef4444' if r['Joriy Qarz'] > 0 else '#10b981'
                 qarz_bg = '#fef2f2' if r['Joriy Qarz'] > 0 else '#ecfdf5'
                 agent_html += f"""
-                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
-                            <div style="background: #e0e7ff; color: #4f46e5; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
-                                {r['Agent Nomi'][0]}
-                            </div>
-                            <div>
-                                <h4 style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 800;">{r['Agent Nomi']}</h4>
-                                <span style="font-size: 12px; color: #64748b; font-weight: 600;">👤 Agent</span>
-                            </div>
+                <div class="floating-card" style="margin-bottom: 0;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="background: #ccfbf1; color: #0d9488; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+                            {r['Agent Nomi'][0]}
                         </div>
-                        <div style="font-size: 13px; color: #475569; margin-bottom: 16px;">
-                            📞 Tel: <strong>{r['Telefon']}</strong>
+                        <div>
+                            <h4 style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 800;">{r['Agent Nomi']}</h4>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">👤 Agent</span>
                         </div>
+                    </div>
+                    <div style="font-size: 13px; color: #475569; margin-bottom: 16px;">
+                        📞 Tel: <strong>{r['Telefon']}</strong>
                     </div>
                     <div style="background: {qarz_bg}; padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Qarz:</span>
@@ -651,13 +550,13 @@ elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
             agent_html += '</div>'
             st.markdown(agent_html, unsafe_allow_html=True)
         else:
-            st.info("Hali hech qanday agent qo'shilmagan.")
+            st.info("Hozircha hech qanday agent mavjud emas.")
 
     with t2:
         col_ag, col_tol = st.columns(2)
         with col_ag:
-            st.markdown('<div class="soft-card"><h4>👥 Yangi Agent qo\'shish</h4>', unsafe_allow_html=True)
-            with st.form("agent_add_form"):
+            st.markdown('<div class="floating-card"><h4>👥 Yangi Agent qo\'shish</h4>', unsafe_allow_html=True)
+            with st.form("agent_add_form_new"):
                 nomi = st.text_input("F.I.Sh:").strip().capitalize()
                 tel = st.text_input("Telefon:")
                 submit_agent = st.form_submit_button("Saqlash")
@@ -668,16 +567,13 @@ elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
                         bazani_saqlash(ombor, kirim, chiqim, agentlar)
                         st.success(f"✅ {nomi} muvaffaqiyatli qo'shildi!")
                         st.rerun()
-                    else:
-                        st.error("Bunday agent allaqachon mavjud!")
-            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_tol:
-            st.markdown('<div class="soft-card"><h4>💰 Qarzni so\'ndirish (To\'lov)</h4>', unsafe_allow_html=True)
+            st.markdown('<div class="floating-card"><h4>💰 Qarzni yopish (To\'lov qabul qilish)</h4>', unsafe_allow_html=True)
             if not agentlar.empty:
-                with st.form("qarz_yopish_form"):
+                with st.form("qarz_yopish_form_new"):
                     t_agent = st.selectbox("Agentni tanlang:", agentlar["Agent Nomi"].unique())
-                    summa = st.number_input("Summa:", min_value=1000.0, step=50000.0)
+                    summa = st.number_input("To'lov Summasi:", min_value=1000.0, step=50000.0)
                     izoh = st.text_input("Izoh:")
                     submit_tolov = st.form_submit_button("To'lovni tasdiqlash")
                     if submit_tolov:
@@ -689,20 +585,19 @@ elif administrator_tasdiq and menyu == "👥 Agentlar & Qarzdorlik":
                         }])
                         chiqim = pd.concat([chiqim, yangi_qayd], ignore_index=True)
                         bazani_saqlash(ombor, kirim, chiqim, agentlar)
-                        st.success(f"✅ Muvaffaqiyatli: {t_agent} hisobidan {format_money(summa)} qabul dili!")
+                        st.success(f"✅ Muvaffaqiyatli qarz to'lovi qabul qilindi!")
                         st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
 elif administrator_tasdiq and menyu == "📥 Yangi Kirim":
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📥 Yangi Kirim Operatsiyasi</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Omborxonaga yangi yoki mavjud tovarlarni qabul qilish paneli</p>
+    <div class="floating-card">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">📥 Yangi Kirim Operatsiyasi</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Omborxonaga yangi yoki mavjud tovarlarni qabul qilish</p>
     </div>
     """, unsafe_allow_html=True)
 
-    with st.container(border=True):
-        kirim_shakli = st.radio("Kirim shakli:", ["Mavjud mahsulot qoldig'ini oshirish", "Yangi mahsulot yaratish (Rasm bilan)"])
+    with st.container():
+        kirim_shakli = st.radio("Kirim shakli:", ["Mavjud mahsulot qoldig'ini oshirish", "Yangi mahsulot yaratish"])
         
         col_k1, col_k2 = st.columns(2)
         with col_k1:
@@ -719,7 +614,6 @@ elif administrator_tasdiq and menyu == "📥 Yangi Kirim":
                 bosh_narx = 10000.0
                 rasm_b64 = ""
 
-            # 📸 Rasm yuklash maydoni
             rasm_fayl = st.file_uploader("Mahsulot rasmini yuklang (Ixtiyoriy):", type=["png", "jpg", "jpeg"])
             if rasm_fayl:
                 rasm_b64 = to_base64(rasm_fayl)
@@ -748,23 +642,21 @@ elif administrator_tasdiq and menyu == "📥 Yangi Kirim":
                 kirim = pd.concat([kirim, yangi_kirim], ignore_index=True)
 
                 bazani_saqlash(ombor, kirim, chiqim, agentlar)
-                st.success(f"✅ Muvaffaqiyatli: {miqdor} {birligi} '{nomi}' omborga qabul qilindi!")
+                st.success(f"✅ Muvaffaqiyatli: {miqdor} {birligi} '{nomi}' qabul qilindi!")
                 st.rerun()
-            else:
-                st.error("Barcha maydonlarni to'ldiring!")
 
 elif administrator_tasdiq and menyu == "📤 Yangi Chiqim":
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">📤 Ombardan Mahsulot Chiqim Qilish</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Tovarlarni agentlarga yuklash yoki naqd savdo qilish paneli</p>
+    <div class="floating-card">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">📤 Ombardan Mahsulot Chiqim Qilish</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Agentlarga mahsulot yuklash yoki naqd savdo operatsiyalari</p>
     </div>
     """, unsafe_allow_html=True)
 
     if ombor.empty:
         st.warning("Omborda mahsulotlar mavjud emas.")
     else:
-        with st.container(border=True):
+        with st.container():
             col_ch1, col_ch2 = st.columns(2)
             with col_ch1:
                 nomi = st.selectbox("Mahsulot:", ombor["Mahsulot Nomi"].unique())
@@ -800,14 +692,14 @@ elif administrator_tasdiq and menyu == "📤 Yangi Chiqim":
                     chiqim = pd.concat([chiqim, yangi_chiqim], ignore_index=True)
 
                     bazani_saqlash(ombor, kirim, chiqim, agentlar)
-                    st.success(f"✅ Muvaffaqiyatli: {miqdor} {birligi} '{nomi}' chiqarildi. Jami summa: {format_money(jami)}")
+                    st.success(f"✅ Chiqim muvaffaqiyatli amalga oshirildi! Jami: {format_money(jami)}")
                     st.rerun()
 
 elif administrator_tasdiq and menyu == "🕒 Amallar Tarixi":
     st.markdown("""
-    <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.03em;">🕒 Ombor Harakatlari Jurnali</h1>
-        <p style="font-size: 16px; color: #64748b; margin: 0;">Barcha kirim va chiqim operatsiyalarining batafsil xronologiyasi</p>
+    <div class="floating-card">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">🕒 Ombor Harakatlari Jurnali</h2>
+        <p style="font-size: 14px; color: #64748b; margin: 0;">Tizimdagi barcha kirim va chiqim operatsiyalarining xronologiyasi</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -845,7 +737,7 @@ elif administrator_tasdiq and menyu == "🕒 Amallar Tarixi":
             """
             st.markdown(html_kirim, unsafe_allow_html=True)
         else:
-            st.info("Hozircha hech qanday kirim amalga oshirilmagan.")
+            st.info("Hozircha kirim qilinmagan.")
 
     with tb2:
         if not chiqim.empty:
@@ -873,8 +765,8 @@ elif administrator_tasdiq and menyu == "🕒 Amallar Tarixi":
                             <td style="font-weight: 700; color: #0f172a;">{r['Mahsulot Nomi']}</td>
                             <td style="font-weight: 800; color: #ef4444;">-{r['Miqdori']:g}</td>
                             <td style="color: #475569;">{r['Qabul qiluvchi']}</td>
-                            <td><span style="background: #eff6ff; color: #3b82f6; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">{r['Agent']}</span></td>
-                            <td style="font-weight: 700; color: #4f46e5;">{summa_str}</td>
+                            <td><span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">{r['Agent']}</span></td>
+                            <td style="font-weight: 700; color: #0d9488;">{summa_str}</td>
                         </tr>
                 """
             html_chiqim += """
@@ -884,4 +776,4 @@ elif administrator_tasdiq and menyu == "🕒 Amallar Tarixi":
             """
             st.markdown(html_chiqim, unsafe_allow_html=True)
         else:
-            st.info("Hozircha hech qanday chiqim amalga oshirilmagan.")
+            st.info("Hozircha chiqim qilinmagan.")
