@@ -14,7 +14,7 @@ st.set_page_config(
 # Custom CSS orqali Streamlit interfeysini butunlay o'zgartiramiz (Premium Dizayn)
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
     
     /* Umumiy fon va shriftlar */
     .stApp {
@@ -238,14 +238,19 @@ if menyu == "📊 Boshqaruv Paneli":
         kam_qoldiq = ombor[ombor["Miqdori"] <= 10] # Zaxira kamligi chegarasi (10 dona)
         if not kam_qoldiq.empty:
             for index, row in kam_qoldiq.iterrows():
+                # Xavfsiz o'zgaruvchilarga olamiz (tutuq belgisi xatolik bermasligi uchun f-stringdan tashqariga chiqaramiz)
+                mahsulot_nomi = row["Mahsulot Nomi"]
+                mahsulot_miqdori = row["Miqdori"]
+                olchov_birligi = row["O'lchov Birligi"]
+                
                 st.markdown(f"""
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background-color: #fff5f5; border-radius: 10px; margin-bottom: 8px; border: 1px solid #fee2e2;">
                     <div>
-                        <b style="color: #991b1b; font-size: 13px;">{row['Mahsulot Nomi']}</b>
+                        <b style="color: #991b1b; font-size: 13px;">{mahsulot_nomi}</b>
                         <div style="font-size: 11px; color: #b91c1c;">Zaxiradan kam qoldi</div>
                     </div>
                     <span style="background-color: #fca5a5; color: #7f1d1d; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700;">
-                        {row['Miqdori']} {row['O'lchov Birligi']}
+                        {mahsulot_miqdori} {olchov_birligi}
                     </span>
                 </div>
                 """, unsafe_allow_html=True)
